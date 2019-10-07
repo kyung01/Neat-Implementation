@@ -22,6 +22,7 @@ public class KLineRenderer : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+		if (objectLineTo == null) return;
 		if (objectLineTo.gameObject == null || objectLineTo.gameObject.active == false) return;
 		lineRenderer.SetPosition(0, objectLineFrom.position);
 		lineRenderer.SetPosition(1, objectLineTo.position);

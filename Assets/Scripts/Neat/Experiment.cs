@@ -8,11 +8,14 @@ public class Experiment : MonoBehaviour
 	public enum EXPERIMENT_STATUS { INITIAL, BREEDING, COMPETING, EVOLVING}
 	[SerializeField]
 	Text textPopulationNumber;
+	[SerializeField]
+	OrganismRenderer PREFAB_ORGANISM_RENDERER;
 
 	EXPERIMENT_STATUS status = EXPERIMENT_STATUS.INITIAL;
 	readonly int SPECIES_OFFSPRING_COUNT = 100;
 
 	Game game;
+	OrganismRenderer playerARenderer, playerBRenderer;
 	List<Species> species = new List<Species>();
 	// Use this for initialization
 	void Start()
