@@ -7,9 +7,11 @@ public class Experiment : MonoBehaviour
 {
 	public enum EXPERIMENT_STATUS { INITIAL, BREEDING, COMPETING, EVOLVING}
 	[SerializeField]
+	OrganismRenderer PREFAB_ORGANISM_RENDERER;
+	[SerializeField]
 	Text textPopulationNumber;
 	[SerializeField]
-	OrganismRenderer PREFAB_ORGANISM_RENDERER;
+	TicTacToeRenderer tictactoeRenderer;
 
 	EXPERIMENT_STATUS status = EXPERIMENT_STATUS.INITIAL;
 	readonly int SPECIES_OFFSPRING_COUNT = 100;
@@ -51,6 +53,10 @@ public class Experiment : MonoBehaviour
 				species[i].breed(getBaseParent());
 			}
 		}
+	}
+	void updateCompeting()
+	{
+
 	}
 	// Update is called once per frame
 	void Update()
