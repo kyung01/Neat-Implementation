@@ -1,12 +1,16 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
 public class Experiment : MonoBehaviour
 {
 	public enum EXPERIMENT_STATUS { INITIAL, BREEDING, COMPETING, EVOLVING}
+	[SerializeField]
+	Text textPopulationNumber;
+
 	EXPERIMENT_STATUS status = EXPERIMENT_STATUS.INITIAL;
-	readonly int SPECIES_OFFSPRING_COUNT = 10;
+	readonly int SPECIES_OFFSPRING_COUNT = 100;
 
 	Game game;
 	List<Species> species = new List<Species>();
@@ -41,13 +45,14 @@ public class Experiment : MonoBehaviour
 		{
 			for(int j = 0; j < SPECIES_OFFSPRING_COUNT; j++)
 			{
-				species[0].breed(getBaseParent());
+				species[i].breed(getBaseParent());
 			}
 		}
 	}
 	// Update is called once per frame
 	void Update()
 	{
+		if(species.Count!= 0)textPopulationNumber.text = "Population : " + species[0].Population;
 		switch (status) {
 			case EXPERIMENT_STATUS.INITIAL:
 				updateInitial();
@@ -56,6 +61,8 @@ public class Experiment : MonoBehaviour
 			case EXPERIMENT_STATUS.BREEDING:
 				updateBreeding();
 				status = EXPERIMENT_STATUS.COMPETING;
+				break;
+			case EXPERIMENT_STATUS.COMPETING:
 				break;
 		}
 

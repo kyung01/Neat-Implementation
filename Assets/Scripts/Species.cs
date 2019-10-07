@@ -103,7 +103,7 @@ public class MutationInformation {
 }
 
 
-public class Species : MonoBehaviour
+public class Species 
 {
 	class MarkedDNA {
 		public int id;
@@ -132,6 +132,8 @@ public class Species : MonoBehaviour
 			else return new DNAConnectionMatch(null, markedDNA.DNA);
 		}
 	}
+
+	public int Population { get { return offsprings.Count; } }
 
 	List<Organism> parent = new List<Organism>();
 	List<DNAConnectionMatch> parentDNAMatches = new List<DNAConnectionMatch>();
@@ -251,16 +253,23 @@ public class Species : MonoBehaviour
 			offspringBody.getNode(dna.to);
 		}
 		float selectedMutation = Random.Range(0, 1.0f);
+
 		if (selectedMutation < 0.09f)
 		{
-			Debug.Log("Mutation to create a new connection");
+			Debug.Log("Mutation : Create a new connection");
 			//10% chance to create a new connection gean
 			int first, second;
+			int whileLoopFailSafe = 100;
 			do
 			{
 				first = Random.Range(0, offspringBody.InputNodeCount + offspringBody.HiddenNodeCount);
 				second = Random.Range(offspringBody.InputNodeCount + offspringBody.HiddenNodeCount, offspringBody.NodeCount);
-			} while (!offspringBody.getNode(first).isConnectedTo(second));
+			} while (whileLoopFailSafe-- > 0 && !offspringBody.getNode(first).isConnectedTo(second));
+			if (whileLoopFailSafe == 0)
+			{
+				Debug.Log("Fail safe is triggered");
+				return;
+			}
 			int mutationID = GlobalIDCounter.NewID;
 			bool isNewMutation = true;
 			//check if this is not new mutation
@@ -278,6 +287,7 @@ public class Species : MonoBehaviour
 			}
 
 			DNAConnection dna = new DNAConnection(mutationID,first,second);
+			Debug.Log("Added DNA : " + dna.from + " to "+ dna.to);
 			offspringBody.dnas.Add(dna);
 			offspringBody.getNode(first).connections.Add(dna);
 			if(isNewMutation)
