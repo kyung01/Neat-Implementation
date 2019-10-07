@@ -138,7 +138,7 @@ public class Species
 	List<Organism> parent = new List<Organism>();
 	List<DNAConnectionMatch> parentDNAMatches = new List<DNAConnectionMatch>();
 
-	List<Organism> offsprings = new List<Organism>();
+	public List<Organism> offsprings = new List<Organism>();
 	List<MutationInformation> mutationHistory = new List<MutationInformation>();
 
 

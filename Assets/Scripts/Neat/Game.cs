@@ -119,10 +119,15 @@ public class Game : MonoBehaviour
 
 	int currentPlayerIndex = 0;
 
-	TicTacToeBoard ticTacToe = new TicTacToeBoard();
+	public TicTacToeBoard ticTacToe = new TicTacToeBoard();
 	float gameFitness = 0;
 
 	Organism playerA, playerB;
+	public Game(Organism playerA, Organism playerB)
+	{
+		this.playerA = playerA;
+		this.playerB = playerB;
+	}
 
 	public void play()
 	{
