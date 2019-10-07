@@ -148,7 +148,7 @@ public class Game : MonoBehaviour
 		int outputNumber = currentPlayer.getOutput();
 		bool outputProperlyProcessed = ticTacToe.mark(marker, outputNumber);
 		if (outputProperlyProcessed) currentPlayer.addIndividualFitness(1);
-		else currentPlayer.addIndividualFitness(-100);
+		else currentPlayer.addIndividualFitness(-0.1f);
 		if (ticTacToe.isGameWon()) currentPlayer.addIndividualFitness(100);		
 	}
 	public bool isGamePlayable()

@@ -41,7 +41,7 @@ public class Experiment : MonoBehaviour
 		{
 			for(int j = 0; j < SPECIES_OFFSPRING_COUNT; j++)
 			{
-				species[0].breed();
+				species[0].breed(getBaseParent());
 			}
 		}
 	}
@@ -55,6 +55,7 @@ public class Experiment : MonoBehaviour
 				break;
 			case EXPERIMENT_STATUS.BREEDING:
 				updateBreeding();
+				status = EXPERIMENT_STATUS.COMPETING;
 				break;
 		}
 
