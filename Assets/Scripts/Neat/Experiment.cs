@@ -102,7 +102,10 @@ public class Experiment : MonoBehaviour
 				}
 			}
 			else
+			{
 				selectedPlayerB++;
+
+			}
 		}
 	}
 	// Update is called once per frame
