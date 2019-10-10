@@ -170,8 +170,8 @@ public class Species
 		{
 			var currentDNA = markedDNAs[i];
 			var nextDNA = (i + 1 < markedDNAs.Count) ? markedDNAs[i + 1] : null;
-			Debug.Log(currentDNA + " , " + nextDNA);
-			Debug.Log(i + " / " + markedDNAs.Count);
+			//Debug.Log(currentDNA + " , " + nextDNA);
+			//Debug.Log(i + " / " + markedDNAs.Count);
 			if(nextDNA!= null && currentDNA.id == nextDNA.id)
 			{
 				parentDNAMatches.Add(new DNAConnectionMatch(currentDNA.DNA, nextDNA.DNA));
@@ -186,8 +186,152 @@ public class Species
 
 
 	}
+	public void breed(Organism unborn)
+	{
+		bool isEqualFitnessParent = Mathf.Sqrt(parent[0].EvaluatedFitness - parent[1].EvaluatedFitness) < 0.01f;
+		bool isABetterParent = parent[0].EvaluatedFitness > parent[1].EvaluatedFitness;
+		for(int i = 0; i < parentDNAMatches.Count; i++)
+		{
+			var dnaPair = parentDNAMatches[i];
+			if(dnaPair.A != null && dnaPair.B!= null)
+			{
+				//both genes exist
+				if (isEqualFitnessParent) {
+					if (Random.RandomRange(0, 2) == 0)
+					{
+						unborn.dnas.Add(dnaPair.A);
+					}
+					else
+						unborn.dnas.Add(dnaPair.B);
+				}
+				else
+				{
+					if (isABetterParent)
+						unborn.dnas.Add(dnaPair.A);
+					else
+						unborn.dnas.Add(dnaPair.B);
+				}
+			}
+			else if( dnaPair.A != null && dnaPair.B == null)
+			{
+				//only A gene exist
+				if (isEqualFitnessParent)
+				{
+					if (Random.RandomRange(0, 2) == 0)
+					{
+						unborn.dnas.Add(dnaPair.A);
+					}
+					else
+					{
 
-	public void breed(Organism offspringBody)
+					}
+				}
+				else
+				{
+					if (isABetterParent)
+						unborn.dnas.Add(dnaPair.A);
+					else
+					{
+
+					}
+				}
+			}
+			else if( dnaPair.A == null && dnaPair.B != null)
+			{
+				//only B gene exist
+				if (isEqualFitnessParent)
+				{
+					if (Random.RandomRange(0, 2) == 0)
+					{
+						unborn.dnas.Add(dnaPair.B);
+					}
+					else
+					{
+
+					}
+				}
+				else
+				{
+					if (isABetterParent)
+						unborn.dnas.Add(dnaPair.B);
+					else
+					{
+
+					}
+				}
+			}
+			else
+			{
+				//No gene exist?
+				Debug.Log("WHAT?");
+			}
+		}
+		for(int i = 0; i< unborn.dnas.Count; i++)
+		{
+			var connectionAKADNA = unborn.dnas[i];
+			unborn.getNode(unborn.dnas[i].from).connections.Add(connectionAKADNA);
+		}
+
+
+
+		float selectedMutation = Random.Range(0, 1.0f);
+
+		if (selectedMutation < 0.2f)
+		{
+			//Debug.Log("Mutation : Create a new connection");
+			//10% chance to create a new connection gean
+			int first, second;
+			int whileLoopFailSafe = 100;
+			do
+			{
+				first = Random.Range(0, unborn.InputNodeCount + unborn.HiddenNodeCount);
+				second = Random.Range(unborn.InputNodeCount + unborn.HiddenNodeCount, unborn.NodeCount);
+			} while (whileLoopFailSafe-- > 0 && !unborn.getNode(first).isConnectedTo(second));
+			if (whileLoopFailSafe == 0)
+			{
+				Debug.Log("Fail safe is triggered");
+				return;
+			}
+			int mutationID = GlobalIDCounter.NewID;
+			bool isNewMutation = true;
+			//check if this is not new mutation
+			for (int i = 0; i < mutationHistory.Count; i++)
+			{
+				if (mutationHistory[i].type == MutationInformation.MUTATION_TYPE.CREATE_CONNECTION &&
+					mutationHistory[i].connectedNodeFrom == first && mutationHistory[i].connectedNodeTo == second)
+				{
+					//found the mutation existing in the history
+					isNewMutation = false;
+					mutationID = mutationHistory[i].id;
+					GlobalIDCounter.UndoNewID();
+					break;
+				}
+			}
+
+			DNAConnection dna = new DNAConnection(mutationID, first, second);
+			//Debug.Log("Added DNA : " + dna.from + " to " + dna.to);
+			unborn.dnas.Add(dna);
+			unborn.getNode(first).connections.Add(dna);
+			if (isNewMutation)
+				mutationHistory.Add(new MutationInformation(mutationID, MutationInformation.MUTATION_TYPE.CREATE_CONNECTION, first, second));
+
+
+		}
+		else if (selectedMutation < 0.18f)
+		{
+			//10% chance to create a new node
+
+		}
+		else
+		{
+			//90% chance to alter weights
+
+		}
+
+		this.offsprings.Add(unborn);
+	}
+
+	public void kBreed(Organism unborn)
 	{
 		//first 
 		bool isUnequalParents = false;
@@ -246,14 +390,16 @@ public class Species
 				}
 			}
 		}
-		offspringBody.dnas = offspringDNA;
+		unborn.dnas = offspringDNA;
 		for(int i = 0; i < offspringDNA.Count; i++)
 		{
 			var dna = offspringDNA[i];
-			var kNode = offspringBody.getNode(dna.from);
+			var kNode = unborn.getNode(dna.from);
 			kNode.connections.Add(dna);
-			offspringBody.getNode(dna.to);
+			unborn.getNode(dna.to);
 		}
+
+
 		float selectedMutation = Random.Range(0, 1.0f);
 
 		if (selectedMutation < 0.2f)
@@ -264,9 +410,9 @@ public class Species
 			int whileLoopFailSafe = 100;
 			do
 			{
-				first = Random.Range(0, offspringBody.InputNodeCount + offspringBody.HiddenNodeCount);
-				second = Random.Range(offspringBody.InputNodeCount + offspringBody.HiddenNodeCount, offspringBody.NodeCount);
-			} while (whileLoopFailSafe-- > 0 && !offspringBody.getNode(first).isConnectedTo(second));
+				first = Random.Range(0, unborn.InputNodeCount + unborn.HiddenNodeCount);
+				second = Random.Range(unborn.InputNodeCount + unborn.HiddenNodeCount, unborn.NodeCount);
+			} while (whileLoopFailSafe-- > 0 && !unborn.getNode(first).isConnectedTo(second));
 			if (whileLoopFailSafe == 0)
 			{
 				Debug.Log("Fail safe is triggered");
@@ -290,8 +436,8 @@ public class Species
 
 			DNAConnection dna = new DNAConnection(mutationID,first,second);
 			Debug.Log("Added DNA : " + dna.from + " to "+ dna.to);
-			offspringBody.dnas.Add(dna);
-			offspringBody.getNode(first).connections.Add(dna);
+			unborn.dnas.Add(dna);
+			unborn.getNode(first).connections.Add(dna);
 			if(isNewMutation)
 				mutationHistory.Add(new MutationInformation(mutationID, MutationInformation.MUTATION_TYPE.CREATE_CONNECTION, first, second));
 
@@ -308,7 +454,7 @@ public class Species
 
 		}
 
-		this.offsprings.Add(offspringBody);
+		this.offsprings.Add(unborn);
 	}
 
 	void init()

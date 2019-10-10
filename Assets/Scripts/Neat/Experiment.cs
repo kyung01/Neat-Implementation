@@ -136,10 +136,16 @@ public class Experiment : MonoBehaviour
 				Debug.Log("Experiment : Failed");
 				specie.setParent(getBaseParent(), getBaseParent());
 			}
+			else if( second.EvaluatedFitness < 0)
+			{
+				Debug.Log("Experiment : Found suitable single parent model " + first.EvaluatedFitness );
+				specie.setParent(first, first);
+			}
 			else
 			{
-				Debug.Log("Experiment : Found suitable parent models");
+				Debug.Log("Experiment : Found suitable two parent model " + first.EvaluatedFitness + " , " + second.EvaluatedFitness);
 				specie.setParent(first, second);
+
 			}
 			specie.offsprings.Clear();
 		}
@@ -151,6 +157,7 @@ public class Experiment : MonoBehaviour
 		if(species.Count!= 0)textPopulationNumber.text = "Population : " + species[0].Population;
 		switch (status) {
 			case EXPERIMENT_STATUS.INITIAL:
+				
 				updateInitial();
 				status = EXPERIMENT_STATUS.BREEDING;
 				break;

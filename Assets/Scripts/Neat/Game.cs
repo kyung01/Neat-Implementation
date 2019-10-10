@@ -45,7 +45,7 @@ public class TicTacToeBoard {
 				break;
 			}
 		}
-		if (matchFound) return true;
+		if (matchFound) { Debug.Log("Horizontal"); return true; }
 
 		for (int i = 0; i < 3; i++)
 		{
@@ -64,44 +64,43 @@ public class TicTacToeBoard {
 				break;
 			}
 		}
-		if (matchFound) return true;
+		if (matchFound) { Debug.Log("Vertical"); return true; }
 
+		bool digonalMatchLeft = true;
 		for (int i = 0; i < 3; i++)
 		{
-			bool digonalMatch = true;
 			if (slots[i * 3 + i] != marker)
 			{
-				digonalMatch = false;
+				digonalMatchLeft = false;
 				break;
 			}
-			if (digonalMatch)
-			{
-				matchFound = true;
-				break;
-			}
+			
 		}
-		if (matchFound) return true;
+		if (digonalMatchLeft) { Debug.Log("digonalMatchLeft"); return true; }
 
+		bool digonalMatchRight = true;
 		for (int i = 0; i < 3; i++)
 		{
-			bool digonalMatch = true;
 			if (slots[i * 3 + (2-i)] != marker)
 			{
-				digonalMatch = false;
-				break;
-			}
-			if (digonalMatch)
-			{
-				matchFound = true;
+				digonalMatchRight = false;
 				break;
 			}
 		}
-		if (matchFound) return true;
+		if (digonalMatchRight) { Debug.Log("Other Digonal"); return true; }
 		return false;
 	}
 	public bool isGameWon()
 	{
-		return checkGameWonBy(SLOT_STATUS.O) || checkGameWonBy(SLOT_STATUS.X);
+		if (checkGameWonBy(SLOT_STATUS.O))
+		{
+			Debug.Log("O Won");
+		}
+		else if (checkGameWonBy(SLOT_STATUS.X))
+		{
+			Debug.Log("X Won");
+		}
+		return false;
 	}
 	public bool isGamePlayable()
 	{
@@ -154,7 +153,7 @@ public class Game
 		}
 		int outputNumber = currentPlayer.getOutput();
 		if (debug) Debug.Log("Game Output: " + outputNumber);
-		if (outputNumber != -1 && outputNumber != 0)
+		if (debug && outputNumber != -1 && outputNumber != 0)
 			Debug.Log("Not 0 output " + outputNumber);
 		
 		bool outputSuccessfullyProcessed = (outputNumber==-1)? false:ticTacToe.mark(marker, outputNumber);
@@ -164,7 +163,7 @@ public class Game
 			currentPlayer.addIndividualFitness(-0.1f);
 			isOrganismMadeInvalidOutput = true;
 		}
-		if (ticTacToe.isGameWon()) currentPlayer.addIndividualFitness(100);		
+		if (ticTacToe.isGameWon()) { Debug.Log("Wow Game Won"); currentPlayer.addIndividualFitness(100); }	
 	}
 	public bool isGamePlayable()
 	{
