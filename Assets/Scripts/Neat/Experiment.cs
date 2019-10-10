@@ -14,6 +14,8 @@ public class Experiment : MonoBehaviour
 	Text selectedPlayerNumber;
 	[SerializeField]
 	TicTacToeRenderer tictactoeRenderer;
+	[SerializeField]
+	OrganismRenderer organismRendererA, organismRendererB;
 
 	EXPERIMENT_STATUS status = EXPERIMENT_STATUS.INITIAL;
 	readonly int SPECIES_OFFSPRING_COUNT = 10;
@@ -75,10 +77,13 @@ public class Experiment : MonoBehaviour
 			for (int organismAIndex = 0; organismAIndex < species[speciesIndex].Population; organismAIndex++)
 				for(int organismBIndex = organismAIndex+1; organismBIndex < species[speciesIndex].Population; organismBIndex++)
 				{
-					for(int gameNumber  = 0; gameNumber<2; gameNumber++)
+					organismRendererA.render(species[speciesIndex].offsprings[organismAIndex]);
+					organismRendererB.render(species[speciesIndex].offsprings[organismBIndex]);
+					for (int gameNumber  = 0; gameNumber<2; gameNumber++)
 					{
 						selectedPlayerNumber.text = "Species " + speciesIndex + "( "+organismAIndex +" vs " + organismBIndex + " )";
 						Game game;
+						Organism playerA, playerB;
 						if (gameNumber == 0)
 						{
 							game = new Game(species[speciesIndex].offsprings[organismAIndex], species[speciesIndex].offsprings[organismBIndex]);

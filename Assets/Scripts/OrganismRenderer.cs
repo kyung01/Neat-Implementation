@@ -25,7 +25,7 @@ public class OrganismRenderer : MonoBehaviour
     {
         
     }
-	public void initialize(Organism organism)
+	public void render(Organism organism)
 	{
 		if(inputNodes.Count == 0)
 		{
@@ -50,7 +50,7 @@ public class OrganismRenderer : MonoBehaviour
 		{
 			outputNodeGroups = new GameObject();
 			outputNodeGroups.transform.parent = this.transform;
-			outputNodeGroups.transform.localPosition = new Vector3(10, 0, 0);
+			outputNodeGroups.transform.localPosition = new Vector3(15, 0, 0);
 			for (int y = 0; y < 3; y++)
 			{
 				for (int x = 0; x < 3; x++)
