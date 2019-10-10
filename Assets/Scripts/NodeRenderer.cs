@@ -36,6 +36,9 @@ public class NodeRenderer : MonoBehaviour
 	void addNewConnection(NodeRenderer endNode)
 	{
 		var connection = Instantiate(PREFAB_LINE_RENDERER).GetComponent<KLineRenderer>();
+		connection.transform.parent = this.transform;
+		connection.transform.localPosition = new Vector3(0, 0, 1);
+		connection.set(this.transform, endNode.transform);
 		this.connections.Add(connection);
 	}
 	public void render(DNANode node, DelGetNodeRenderer search)

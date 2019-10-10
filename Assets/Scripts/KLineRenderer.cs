@@ -27,4 +27,9 @@ public class KLineRenderer : MonoBehaviour
 		lineRenderer.SetPosition(0, objectLineFrom.position);
 		lineRenderer.SetPosition(1, objectLineTo.position);
 	}
+	public void set(Transform from, Transform to)
+	{
+		objectLineFrom = from;
+		objectLineTo = to;
+	}
 }

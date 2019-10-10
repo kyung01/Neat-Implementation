@@ -170,8 +170,9 @@ public class Species
 		{
 			var currentDNA = markedDNAs[i];
 			var nextDNA = (i + 1 < markedDNAs.Count) ? markedDNAs[i + 1] : null;
-
-			if(currentDNA.id == nextDNA.id)
+			Debug.Log(currentDNA + " , " + nextDNA);
+			Debug.Log(i + " / " + markedDNAs.Count);
+			if(nextDNA!= null && currentDNA.id == nextDNA.id)
 			{
 				parentDNAMatches.Add(new DNAConnectionMatch(currentDNA.DNA, nextDNA.DNA));
 				i += 2;
@@ -249,12 +250,13 @@ public class Species
 		for(int i = 0; i < offspringDNA.Count; i++)
 		{
 			var dna = offspringDNA[i];
-			offspringBody.getNode(dna.from).connections.Add(dna);
+			var kNode = offspringBody.getNode(dna.from);
+			kNode.connections.Add(dna);
 			offspringBody.getNode(dna.to);
 		}
 		float selectedMutation = Random.Range(0, 1.0f);
 
-		if (selectedMutation < 0.09f)
+		if (selectedMutation < 0.2f)
 		{
 			Debug.Log("Mutation : Create a new connection");
 			//10% chance to create a new connection gean

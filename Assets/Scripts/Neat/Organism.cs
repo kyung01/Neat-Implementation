@@ -4,6 +4,13 @@ using System.Collections.Generic;
 
 public class Organism
 {
+	public static int CompareByEvaluatedFitness(Organism a, Organism b)
+	{
+		float difference = a.evaluatedFitness - b.evaluatedFitness;
+		if (difference * difference < 0.01f) return 0;
+		if (a.EvaluatedFitness < b.EvaluatedFitness) return -1;
+		return 1;
+	}
 	public Organism(List<DNAConnection> dnas, List<DNANode> inputNodes, List<DNANode> outputNode)
 	{
 		this.dnas = dnas;
@@ -29,7 +36,7 @@ public class Organism
 	float individualFitness = -1;
 	float evaluatedFitness = 0;
 	public float IndividualFitness { get { return individualFitness; } }
-	public float EvaluatedFitness { get { return evaluatedFitness; } }
+	public float EvaluatedFitness { get { return evaluatedFitness; } set { evaluatedFitness = value; } }
 
 
 	void updateHiddeLayers(List<DNAConnection> dnas)

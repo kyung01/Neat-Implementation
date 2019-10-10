@@ -66,9 +66,12 @@ public class Experiment : MonoBehaviour
 	int selectedPlayerA = 0;
 	int selectedPlayerB = 1;
 
+	bool isCompetitionComplete = false;
 	void updateCompeting()
 	{
 		//start coroutine
+		if (isCompetitionComplete)
+			status = EXPERIMENT_STATUS.EVOLVING;
 	}
 	IEnumerator Competition()
 	{
@@ -103,8 +106,44 @@ public class Experiment : MonoBehaviour
 				}
 			
 		}
+		isCompetitionComplete = true;
 		Debug.Log("Competition FInished");
 	
+	}
+	
+	void updateEvolving()
+	{
+		//first stage is give evaluated fitness to all the members
+		for(int speciesIndex = 0; speciesIndex< species.Count; speciesIndex++)
+		{
+			for(int i = 0; i  < species[speciesIndex].Population; i++)
+			{
+				var organism = species[speciesIndex].offsprings[i];
+				organism.EvaluatedFitness = organism.IndividualFitness / species[speciesIndex].Population;
+			}
+		}
+		//Choose highest two members from each species 
+		for (int speciesIndex = 0; speciesIndex < species.Count; speciesIndex++)
+		{
+			var specie = species[speciesIndex];
+			specie.offsprings.Sort(Organism.CompareByEvaluatedFitness);
+			var first = specie.offsprings[specie.offsprings.Count - 1];
+			var second = specie.offsprings[specie.offsprings.Count - 2];
+
+			if (first.EvaluatedFitness < 0)
+			{
+				//failed experiment
+				Debug.Log("Experiment : Failed");
+				specie.setParent(getBaseParent(), getBaseParent());
+			}
+			else
+			{
+				Debug.Log("Experiment : Found suitable parent models");
+				specie.setParent(first, second);
+			}
+			specie.offsprings.Clear();
+		}
+		status = EXPERIMENT_STATUS.BREEDING;
 	}
 	// Update is called once per frame
 	void Update()
@@ -123,11 +162,15 @@ public class Experiment : MonoBehaviour
 				selectedPlayerB = 1;
 				game = null;
 				hasPlayedBackward = false;
+				isCompetitionComplete = false;
 				StartCoroutine("Competition");
 				status = EXPERIMENT_STATUS.COMPETING;
 				break;
 			case EXPERIMENT_STATUS.COMPETING:
 				updateCompeting();
+				break;
+			case EXPERIMENT_STATUS.EVOLVING:
+				updateEvolving();
 				break;
 		}
 
