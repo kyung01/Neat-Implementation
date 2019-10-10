@@ -45,5 +45,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PREFAB_NODE: {fileID: 5504191042855924961, guid: ab0207d059bdb294aa2a4a805066da6c,
     type: 3}
+  PREFAB_NODE_RENDERER: {fileID: 3610145809696381615, guid: d8c45e523eafe6c42826ed085d8b4a81,
+    type: 3}
   PREFAB_LINE_RENDERER: {fileID: 276987230309384181, guid: f42c19bd12cfaa44f96545adf441b497,
     type: 3}

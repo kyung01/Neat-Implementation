@@ -5,10 +5,12 @@ using UnityEngine;
 public class NodeRenderer : MonoBehaviour
 {
 	[SerializeField]
-	KLineRenderer lineRenderer;
+	KLineRenderer PREFAB_LINE_RENDERER;
 	public delegate NodeRenderer DelGetNodeRenderer(int index);
 
+
 	DNANode node;
+	List<KLineRenderer> connections = new List<KLineRenderer>();
     // Start is called before the first frame update
     void Start()
     {
@@ -25,10 +27,26 @@ public class NodeRenderer : MonoBehaviour
 	/// </summary>
 	public void reset()
 	{
-
+		for(int i = 0; i < connections.Count; i++)
+		{
+			GameObject.Destroy(connections[i].gameObject);
+		}
+		connections.Clear();
+	}
+	void addNewConnection(NodeRenderer endNode)
+	{
+		var connection = Instantiate(PREFAB_LINE_RENDERER).GetComponent<KLineRenderer>();
+		this.connections.Add(connection);
 	}
 	public void render(DNANode node, DelGetNodeRenderer search)
 	{
+		this.node = node;
+		foreach(var connection in node.connections)
+		{
+			var end = search(connection.to);
+			addNewConnection(end);
+
+		}
 			
 	}
 }
