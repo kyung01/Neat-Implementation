@@ -14,7 +14,8 @@ public class Organism
 		{
 			outputNodePowers.Add(0);
 			DNANode node = outputNodes[i];
-			node.handleActivation.Add(power => { recordOutput(i, power); });
+			int n = i;
+			node.handleActivation.Add(power => { recordOutput(n, power); });
 
 		}
 
@@ -63,6 +64,7 @@ public class Organism
 
 	void recordOutput(int index, float power)
 	{
+		if(index< 0 || index >= outputNodePowers.Count) { Debug.Log(index + " and " + outputNodePowers.Count); }
 		outputNodePowers[index] += power;
 	}
 
@@ -76,8 +78,8 @@ public class Organism
 	}
 	public int getOutput()
 	{
-		int selectedOutputChannel = 0;
-		float mostPower = -1;
+		int selectedOutputChannel = -1;
+		float mostPower = 0;
 		for (int i = 0; i < outputNodePowers.Count; i++)
 		{
 			if (outputNodePowers[i] > mostPower)
@@ -90,6 +92,6 @@ public class Organism
 		{
 			outputNodePowers[i] = 0;
 		}
-		return 0;
+		return selectedOutputChannel;
 	}
 }

@@ -111,8 +111,9 @@ public class TicTacToeBoard {
 	}
 }
 
-public class Game : MonoBehaviour
+public class Game 
 {
+	bool debug = false;
 	//game of tic tac toe 9 slots with 2 different input types and one for "ongoing" status
 	int inputNumber = 9 * 2 + 1;
 	int outputNumber = 9; //9 slots
@@ -120,6 +121,7 @@ public class Game : MonoBehaviour
 	int currentPlayerIndex = 0;
 
 	public TicTacToeBoard ticTacToe = new TicTacToeBoard();
+	bool isOrganismMadeInvalidOutput = false;
 	float gameFitness = 0;
 
 	Organism playerA, playerB;
@@ -151,14 +153,22 @@ public class Game : MonoBehaviour
 				currentPlayer.activateInput(1+9 + i, 1);
 		}
 		int outputNumber = currentPlayer.getOutput();
-		bool outputProperlyProcessed = ticTacToe.mark(marker, outputNumber);
-		if (outputProperlyProcessed) currentPlayer.addIndividualFitness(1);
-		else currentPlayer.addIndividualFitness(-0.1f);
+		if (debug) Debug.Log("Game Output: " + outputNumber);
+		if (outputNumber != -1 && outputNumber != 0)
+			Debug.Log("Not 0 output " + outputNumber);
+		
+		bool outputSuccessfullyProcessed = (outputNumber==-1)? false:ticTacToe.mark(marker, outputNumber);
+		if (debug) Debug.Log("Game outputSuccessfullyProcessed: " + outputSuccessfullyProcessed);
+		if (outputSuccessfullyProcessed) currentPlayer.addIndividualFitness(1);
+		else {
+			currentPlayer.addIndividualFitness(-0.1f);
+			isOrganismMadeInvalidOutput = true;
+		}
 		if (ticTacToe.isGameWon()) currentPlayer.addIndividualFitness(100);		
 	}
 	public bool isGamePlayable()
 	{
-		return ticTacToe.isGamePlayable();
+		return !isOrganismMadeInvalidOutput && ticTacToe.isGamePlayable();
 	}
 	
 }
