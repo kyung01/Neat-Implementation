@@ -101,4 +101,19 @@ public class Organism
 		}
 		return selectedOutputChannel;
 	}
+	public void addDNA(DNAConnection dna)
+	{
+		dnas.Add(dna);
+		getNode(dna.from).connections.Add(dna);
+	}
+	public void disable(DNAConnection dna)
+	{
+		dna.activated = false;
+		getNode(dna.from).connections.Remove(dna);
+	}
+	public int getNewNodeIndex()
+	{
+		hiddenNodes.Add(new DNANode());
+		return InputNodeCount + HiddenNodeCount - 1;
+	}
 }

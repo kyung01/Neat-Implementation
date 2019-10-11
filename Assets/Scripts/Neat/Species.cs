@@ -65,7 +65,15 @@ public class MutationInformation {
 	public enum MUTATION_TYPE { NONE, CREATE_CONNECTION, CREATE_NODE }
 
 	public MUTATION_TYPE type = MUTATION_TYPE.NONE;
+	/// <summary>
+	/// ID of the mutation
+	/// </summary>
 	public int id = 0;
+	/// <summary>
+	/// in case it is create connection, a secondary id is required for the outgoing connection dna
+	/// </summary>
+	public int id2 = 0;
+
 	/// <summary>
 	/// if conneciton mutation is selected then the node that's being splited is recorded
 	/// </summary>
@@ -79,6 +87,13 @@ public class MutationInformation {
 	{
 
 	}
+	/// <summary>
+	/// If it is create a node "a" is indicates splitted node's id "b" indicated second id of the mutation... yes it is confusing
+	/// </summary>
+	/// <param name="id"></param>
+	/// <param name="type"></param>
+	/// <param name="a"></param>
+	/// <param name="b"></param>
 	public MutationInformation(int id, MUTATION_TYPE type, int a, int b = 0)
 	{
 		this.id = id;
@@ -273,8 +288,15 @@ public class Species
 		}
 
 
+		addMutation(unborn);
+
+		this.offsprings.Add(unborn);
+	}
+	void addMutation(Organism organism)
+	{
 
 		float selectedMutation = Random.Range(0, 1.0f);
+		bool isNewMutation = true;
 
 		if (selectedMutation < 0.2f)
 		{
@@ -284,16 +306,15 @@ public class Species
 			int whileLoopFailSafe = 100;
 			do
 			{
-				first = Random.Range(0, unborn.InputNodeCount + unborn.HiddenNodeCount);
-				second = Random.Range(unborn.InputNodeCount + unborn.HiddenNodeCount, unborn.NodeCount);
-			} while (whileLoopFailSafe-- > 0 && !unborn.getNode(first).isConnectedTo(second));
+				first = Random.Range(0, organism.InputNodeCount + organism.HiddenNodeCount);
+				second = Random.Range(organism.InputNodeCount + organism.HiddenNodeCount, organism.NodeCount);
+			} while (whileLoopFailSafe-- > 0 && !organism.getNode(first).isConnectedTo(second));
 			if (whileLoopFailSafe == 0)
 			{
 				Debug.Log("Fail safe is triggered");
 				return;
 			}
 			int mutationID = GlobalIDCounter.NewID;
-			bool isNewMutation = true;
 			//check if this is not new mutation
 			for (int i = 0; i < mutationHistory.Count; i++)
 			{
@@ -310,8 +331,8 @@ public class Species
 
 			DNAConnection dna = new DNAConnection(mutationID, first, second);
 			//Debug.Log("Added DNA : " + dna.from + " to " + dna.to);
-			unborn.dnas.Add(dna);
-			unborn.getNode(first).connections.Add(dna);
+			organism.dnas.Add(dna);
+			organism.getNode(first).connections.Add(dna);
 			if (isNewMutation)
 				mutationHistory.Add(new MutationInformation(mutationID, MutationInformation.MUTATION_TYPE.CREATE_CONNECTION, first, second));
 
@@ -320,6 +341,52 @@ public class Species
 		else if (selectedMutation < 0.18f)
 		{
 			//10% chance to create a new node
+			//check condition
+			if (organism.dnas.Count == 0) return;
+			//choose a connection
+			DNAConnection dnaConnection;
+			
+				int selectedDnaIndex = Random.RandomRange(0, organism.dnas.Count);
+				dnaConnection = organism.dnas[selectedDnaIndex];
+			
+				//check if the mutation exists
+				MutationInformation mutationInformationFromHistory = null;
+				foreach(var history in mutationHistory)
+				{
+					if(history.type == MutationInformation.MUTATION_TYPE.CREATE_NODE  && history.splittedConnection == selectedDnaIndex)
+					{
+						//yes indeed it is a mutation that happened before
+						mutationInformationFromHistory = history;
+						break;
+					}
+				}
+				int idInward, idOutgoing;
+				if(mutationInformationFromHistory!= null)
+				{
+					idInward = mutationInformationFromHistory.id;
+					idOutgoing = mutationInformationFromHistory.id2;
+				}
+				else
+				{
+					idInward = GlobalIDCounter.NewID;
+					idOutgoing = GlobalIDCounter.NewID;
+				}
+				//disable the current dna
+				organism.disable(dnaConnection);
+				int newNodeIndex = organism.getNewNodeIndex();
+				DNAConnection dnaInward, dnaOutward;
+				dnaInward = new DNAConnection(idInward, dnaConnection.from, newNodeIndex);
+				dnaOutward = new DNAConnection(idOutgoing, newNodeIndex, dnaConnection.to);
+				dnaOutward.weight = dnaConnection.weight;
+				organism.addDNA(dnaInward);
+				organism.addDNA(dnaOutward);
+			if(mutationInformationFromHistory == null)
+			{
+				//update the history
+				mutationInformationFromHistory = new MutationInformation(idInward, MutationInformation.MUTATION_TYPE.CREATE_NODE, selectedDnaIndex, idOutgoing);
+				mutationHistory.Add(mutationInformationFromHistory);
+			}
+			
 
 		}
 		else
@@ -328,9 +395,7 @@ public class Species
 
 		}
 
-		this.offsprings.Add(unborn);
 	}
-
 	public void kBreed(Organism unborn)
 	{
 		//first 
