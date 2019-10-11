@@ -39,9 +39,16 @@ public class OrganismRenderer : MonoBehaviour
 	public void render(Organism organism)
 	{
 		allNodes.Clear();
+		foreach(var node in hiddenNodes)
+		{
+			GameObject.Destroy(node.gameObject);
+		}
+		hiddenNodes.Clear();
+
+
 		for (int i = 0; i < organism.HiddenNodeCount; i++)
 		{
-			hiddenNodes.Add(hprGetNode(4 + i % 10, (int)(i / 10), 0));
+			hiddenNodes.Add(hprGetNode(7 + i % 10, (int)(i / 10), 0));
 		}
 		if(inputNodes.Count == 0)
 		{
@@ -68,8 +75,8 @@ public class OrganismRenderer : MonoBehaviour
 
 		}
 		foreach (var node in inputNodes)	allNodes.Add(node);
-		foreach (var node in hiddenNodes)	allNodes.Add(node);
 		foreach (var node in outputNodes)	allNodes.Add(node);
+		foreach (var node in hiddenNodes)	allNodes.Add(node);
 		for (int i = 0; i < allNodes.Count; i++)
 			allNodes[i].reset();
 		for(int i = 0; i < organism.NodeCount; i++)

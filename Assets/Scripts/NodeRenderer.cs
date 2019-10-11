@@ -44,10 +44,12 @@ public class NodeRenderer : MonoBehaviour
 	public void render(DNANode node, DelGetNodeRenderer search)
 	{
 		this.node = node;
+		for(int i = 0; i< node.connections.Count; i++)
+		{
+			addNewConnection(search(node.connections[i].to));
+		}
 		foreach(var connection in node.connections)
 		{
-			var end = search(connection.to);
-			addNewConnection(end);
 
 		}
 			

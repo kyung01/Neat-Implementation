@@ -17,6 +17,10 @@ public class DNAConnection {
 		this.from = from;
 		this.to = to;
 	}
+	public string toString()
+	{
+		return id + ((activated)?"T":"F") +weight+ "(" + from + "->" + to + ")";
+	}
 
 }
 
@@ -36,6 +40,7 @@ public class DNANode
 		for(int i = 0; i< connections.Count; i++)
 		{
 			if (!connections[i].activated) continue;
+			//Debug.Log("Activating " + connections[i].to);
 			function(connections[i].to).activate(signal * connections[i].weight, function);
 		}
 	}
@@ -126,7 +131,7 @@ public class Species
 		public MarkedDNA(DNAConnection dna, int id)
 		{
 			this.DNA = dna;
-			this.id = id;
+			this.id = dna.id;
 		}
 
 	}
@@ -187,16 +192,28 @@ public class Species
 			var nextDNA = (i + 1 < markedDNAs.Count) ? markedDNAs[i + 1] : null;
 			//Debug.Log(currentDNA + " , " + nextDNA);
 			//Debug.Log(i + " / " + markedDNAs.Count);
+			if(nextDNA == null)
+			{
+				//Debug.Log("Single gene was found " + i + " , "+ markedDNAs.Count);
+			}
 			if(nextDNA!= null && currentDNA.id == nextDNA.id)
 			{
 				parentDNAMatches.Add(new DNAConnectionMatch(currentDNA.DNA, nextDNA.DNA));
+				//Debug.Log("added a pair to the DNA pool");
 				i += 2;
 			}
 			else
 			{
 				parentDNAMatches.Add(DNAConnectionMatch.ConvertMarkedDNA(currentDNA));
+				//Debug.Log("added a single to the DNA pool");
 				i += 1;
 			}
+		}
+		for(int i = 0; i < parentDNAMatches.Count; i++)
+		{
+			//string a = (parentDNAMatches[i].A == null) ? "NONE" : parentDNAMatches[i].A.toString() + "(" + parentDNAMatches[i].A.id+")";
+			//string b = (parentDNAMatches[i].B == null) ? "NONE" : parentDNAMatches[i].B.toString() + "(" + parentDNAMatches[i].B.id+")";
+			//Debug.Log(i+" : "+a + " and " +b);
 		}
 
 
@@ -292,13 +309,14 @@ public class Species
 
 		this.offsprings.Add(unborn);
 	}
+
 	void addMutation(Organism organism)
 	{
 
 		float selectedMutation = Random.Range(0, 1.0f);
 		bool isNewMutation = true;
 
-		if (selectedMutation < 0.2f)
+		if (selectedMutation < 0.51f)
 		{
 			//Debug.Log("Mutation : Create a new connection");
 			//10% chance to create a new connection gean
@@ -306,9 +324,13 @@ public class Species
 			int whileLoopFailSafe = 100;
 			do
 			{
-				first = Random.Range(0, organism.InputNodeCount + organism.HiddenNodeCount);
-				second = Random.Range(organism.InputNodeCount + organism.HiddenNodeCount, organism.NodeCount);
-			} while (whileLoopFailSafe-- > 0 && !organism.getNode(first).isConnectedTo(second));
+				first =  Random.Range(0, organism.InputNodeCount + organism.HiddenNodeCount);
+				if (first >= organism.InputNodeCount) first += organism.OutputNodeCount;
+				second = Random.Range(organism.InputNodeCount, organism.OutputNodeCount+ organism.HiddenNodeCount);				
+			} while (
+			//however choosing input - input is not valid
+			(first < organism.InputNodeCount && second < organism.InputNodeCount) &&
+			whileLoopFailSafe-- > 0 && !organism.getNode(first).isConnectedTo(second));;
 			if (whileLoopFailSafe == 0)
 			{
 				Debug.Log("Fail safe is triggered");
@@ -338,12 +360,16 @@ public class Species
 
 
 		}
-		else if (selectedMutation < 0.18f)
+		else if (selectedMutation < 0.88f)
 		{
 			//10% chance to create a new node
 			//check condition
-			if (organism.dnas.Count == 0) return;
-			//choose a connection
+			if (organism.dnas.Count == 0)
+			{
+				Debug.Log("Cannot create a new node");
+				return;
+			}
+			Debug.Log("create a new node");
 			DNAConnection dnaConnection;
 			
 				int selectedDnaIndex = Random.RandomRange(0, organism.dnas.Count);
@@ -392,135 +418,15 @@ public class Species
 		else
 		{
 			//90% chance to alter weights
-
+			if (organism.dnas.Count == 0) return;
+			var dna = organism.dnas[Random.Range(0, organism.dnas.Count)];
+			dna.weight = Random.Range(dna.weight - 0.1f, dna.weight + 0.1f);
+			dna.weight = Mathf.Max(0, Mathf.Min(1.0f, dna.weight));
 		}
 
 	}
-	public void kBreed(Organism unborn)
-	{
-		//first 
-		bool isUnequalParents = false;
-		bool isADominating = false;
-		List<DNAConnection> offspringDNA = new List<DNAConnection>();
 
-		if (parent[0].EvaluatedFitness == parent[1].EvaluatedFitness)
-		{
-			//equal parents
-			for(int i = 0; i< parentDNAMatches.Count; i++)
-			{
-				if (Random.RandomRange(0, 2) == 0)
-				{
-					//first 
-					offspringDNA.Add(parentDNAMatches[i].A);
-				}
-				else
-				{
-					//second
-					offspringDNA.Add(parentDNAMatches[i].B);
-				}
-			}
-		}
-		else if(parent[0].EvaluatedFitness > parent[1].EvaluatedFitness)
-		{
-			//parent 0 dominated fitness
-			isUnequalParents = true;
-			isADominating = true;
-		}
-		else
-		{
-			isUnequalParents = true;
-			//parent 1 dominated fitness
-		}
-		if (isUnequalParents)
-		{
-			for(int i = 0; i < parentDNAMatches.Count; i++)
-			{
-				bool disjointed = false;
-				if (parentDNAMatches[i].A == null || parentDNAMatches[i].B == null)
-					disjointed = true;
-				if (!disjointed)
-				{
-					offspringDNA.Add(parentDNAMatches[i].A);
-				}
-				else
-				{
-					if (isADominating)
-					{
-						if(parentDNAMatches[i].A!= null) offspringDNA.Add(parentDNAMatches[i].A);
-					}
-					else
-					{
-						if (parentDNAMatches[i].B != null) offspringDNA.Add(parentDNAMatches[i].B);
-					}
-				}
-			}
-		}
-		unborn.dnas = offspringDNA;
-		for(int i = 0; i < offspringDNA.Count; i++)
-		{
-			var dna = offspringDNA[i];
-			var kNode = unborn.getNode(dna.from);
-			kNode.connections.Add(dna);
-			unborn.getNode(dna.to);
-		}
-
-
-		float selectedMutation = Random.Range(0, 1.0f);
-
-		if (selectedMutation < 0.2f)
-		{
-			Debug.Log("Mutation : Create a new connection");
-			//10% chance to create a new connection gean
-			int first, second;
-			int whileLoopFailSafe = 100;
-			do
-			{
-				first = Random.Range(0, unborn.InputNodeCount + unborn.HiddenNodeCount);
-				second = Random.Range(unborn.InputNodeCount + unborn.HiddenNodeCount, unborn.NodeCount);
-			} while (whileLoopFailSafe-- > 0 && !unborn.getNode(first).isConnectedTo(second));
-			if (whileLoopFailSafe == 0)
-			{
-				Debug.Log("Fail safe is triggered");
-				return;
-			}
-			int mutationID = GlobalIDCounter.NewID;
-			bool isNewMutation = true;
-			//check if this is not new mutation
-			for(int i = 0; i < mutationHistory.Count; i++)
-			{
-				if(mutationHistory[i].type == MutationInformation.MUTATION_TYPE.CREATE_CONNECTION &&
-					mutationHistory[i].connectedNodeFrom == first && mutationHistory[i].connectedNodeTo == second)
-				{
-					//found the mutation existing in the history
-					isNewMutation = false;
-					mutationID = mutationHistory[i].id;
-					GlobalIDCounter.UndoNewID();
-					break;
-				}
-			}
-
-			DNAConnection dna = new DNAConnection(mutationID,first,second);
-			Debug.Log("Added DNA : " + dna.from + " to "+ dna.to);
-			unborn.dnas.Add(dna);
-			unborn.getNode(first).connections.Add(dna);
-			if(isNewMutation)
-				mutationHistory.Add(new MutationInformation(mutationID, MutationInformation.MUTATION_TYPE.CREATE_CONNECTION, first, second));
-
-
-		}
-		else if(selectedMutation < 0.18f)
-		{
-			//10% chance to create a new node
-
-		}
-		else
-		{
-			//90% chance to alter weights
-
-		}
-
-		this.offsprings.Add(unborn);
-	}
+	
 
 	void init()
 	{

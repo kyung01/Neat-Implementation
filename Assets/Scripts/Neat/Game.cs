@@ -143,13 +143,41 @@ public class Game
 			currentPlayer = playerB;
 			marker = TicTacToeBoard.SLOT_STATUS.O;
 		}
-		currentPlayer.activateInput(0, 1);
+		try
+		{
+			currentPlayer.activateInput(0, 1);
+		}
+		catch (System.StackOverflowException exception)
+		{
+			currentPlayer.kill();
+			Debug.Log("Fried AI");
+		}
 		for (int i = 0; i < 9; i++)
 		{
 			if (ticTacToe.slots[i] == TicTacToeBoard.SLOT_STATUS.X)
-				currentPlayer.activateInput(1 + i, 1);
+			{
+				try
+				{
+					currentPlayer.activateInput(1 + i, 1);
+				}
+				catch(System.StackOverflowException exception)
+				{
+					currentPlayer.kill();
+					Debug.Log("Fried AI");
+				}
+			}
 			else if (ticTacToe.slots[i] == TicTacToeBoard.SLOT_STATUS.O)
-				currentPlayer.activateInput(1+9 + i, 1);
+			{
+				try
+				{
+					currentPlayer.activateInput(1 + 9 + i, 1);
+				}
+				catch(System.StackOverflowException exception)
+				{
+					currentPlayer.kill();
+					Debug.Log("Fried AI");
+				}
+			}
 		}
 		int outputNumber = currentPlayer.getOutput();
 		if (debug) Debug.Log("Game Output: " + outputNumber);

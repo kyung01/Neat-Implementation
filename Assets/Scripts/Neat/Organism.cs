@@ -33,6 +33,7 @@ public class Organism
 	List<DNANode> outputNodes = new List<DNANode>();
 	List<float> outputNodePowers = new List<float>();
 
+	bool isAlive = true;
 	float individualFitness = -1;
 	float evaluatedFitness = 0;
 	public float IndividualFitness { get { return individualFitness; } }
@@ -77,6 +78,7 @@ public class Organism
 
 	public void activateInput(int inputNumber, float power)
 	{
+		if (!isAlive) return;
 		inputNodes[inputNumber].activate(power, getNode);
 	}
 	public void addIndividualFitness(float fitness)
@@ -115,5 +117,15 @@ public class Organism
 	{
 		hiddenNodes.Add(new DNANode());
 		return InputNodeCount + HiddenNodeCount - 1;
+	}
+	public void kill()
+	{
+		isAlive = false;
+	}
+	public string printDNA()
+	{
+		string dnaString = "";
+		foreach (var piece in dnas) dnaString += piece.toString() + " ";
+		return dnaString;
 	}
 }

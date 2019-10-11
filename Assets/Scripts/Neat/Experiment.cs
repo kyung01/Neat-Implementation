@@ -13,6 +13,10 @@ public class Experiment : MonoBehaviour
 	[SerializeField]
 	Text selectedPlayerNumber;
 	[SerializeField]
+	Text selectedPlayerInformationA;
+	[SerializeField]
+	Text selectedPlayerInformationB;
+	[SerializeField]
 	TicTacToeRenderer tictactoeRenderer;
 	[SerializeField]
 	OrganismRenderer organismRendererA, organismRendererB;
@@ -85,6 +89,8 @@ public class Experiment : MonoBehaviour
 					for (int gameNumber  = 0; gameNumber<2; gameNumber++)
 					{
 						selectedPlayerNumber.text = "Species " + speciesIndex + "( "+organismAIndex +" vs " + organismBIndex + " )";
+						selectedPlayerInformationA.text = "A : " + species[speciesIndex].offsprings[organismAIndex].printDNA();
+						selectedPlayerInformationB.text = "B : " + species[speciesIndex].offsprings[organismBIndex].printDNA();
 						Game game;
 						Organism playerA, playerB;
 						if (gameNumber == 0)
