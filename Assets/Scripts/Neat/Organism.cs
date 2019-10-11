@@ -116,7 +116,7 @@ public class Organism
 	public int getNewNodeIndex()
 	{
 		hiddenNodes.Add(new DNANode());
-		return InputNodeCount + HiddenNodeCount - 1;
+		return InputNodeCount + OutputNodeCount+  HiddenNodeCount - 1;
 	}
 	public void kill()
 	{

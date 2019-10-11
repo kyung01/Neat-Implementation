@@ -34,10 +34,12 @@ public class OrganismRenderer : MonoBehaviour
 	}
 	NodeRenderer searchNodeRenderer(int index)
 	{
+		Debug.Log("index" + index + " , " + allNodes.Count);
 		return allNodes[index];
 	}
 	public void render(Organism organism)
 	{
+		Debug.Log("ORganism with nodes " + organism.NodeCount);
 		allNodes.Clear();
 		foreach(var node in hiddenNodes)
 		{

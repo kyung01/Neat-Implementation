@@ -31,8 +31,12 @@ public class DNANode
 	public List<DNAConnection> connections = new List<DNAConnection>();
 	public List<DEL_NODE_ACTIVATED> handleActivation = new List<DEL_NODE_ACTIVATED>();
 
-	public virtual void activate(float signal, DEL_NODE_SEARCHING_FUNCTION function)
+	public virtual void activate(float signal, DEL_NODE_SEARCHING_FUNCTION function, int iterationLevel = 0)
 	{
+		if(iterationLevel > 10)
+		{
+			return;
+		}
 		for(int i = 0; i < handleActivation.Count; i++)
 		{
 			handleActivation[i](signal);
@@ -41,7 +45,7 @@ public class DNANode
 		{
 			if (!connections[i].activated) continue;
 			//Debug.Log("Activating " + connections[i].to);
-			function(connections[i].to).activate(signal * connections[i].weight, function);
+			function(connections[i].to).activate(signal * connections[i].weight, function, iterationLevel+1);
 		}
 	}
 
@@ -57,10 +61,10 @@ public class DNANode
 public class DNANodeOutput:DNANode
 {
 	public float accumulatedSignal;
-	public override void activate(float signal, DEL_NODE_SEARCHING_FUNCTION function)
+	public override void activate(float signal, DEL_NODE_SEARCHING_FUNCTION function, int iterationLevel = 0)
 	{
 		accumulatedSignal += signal;
-		base.activate(signal, function);
+		base.activate(signal, function, iterationLevel);
 	}
 }
 
@@ -231,17 +235,17 @@ public class Species
 				if (isEqualFitnessParent) {
 					if (Random.RandomRange(0, 2) == 0)
 					{
-						unborn.dnas.Add(dnaPair.A);
+						unborn.addDNA(dnaPair.A);
 					}
 					else
-						unborn.dnas.Add(dnaPair.B);
+						unborn.addDNA(dnaPair.B);
 				}
 				else
 				{
 					if (isABetterParent)
-						unborn.dnas.Add(dnaPair.A);
+						unborn.addDNA(dnaPair.A);
 					else
-						unborn.dnas.Add(dnaPair.B);
+						unborn.addDNA(dnaPair.B);
 				}
 			}
 			else if( dnaPair.A != null && dnaPair.B == null)
@@ -251,7 +255,7 @@ public class Species
 				{
 					if (Random.RandomRange(0, 2) == 0)
 					{
-						unborn.dnas.Add(dnaPair.A);
+						unborn.addDNA(dnaPair.A);
 					}
 					else
 					{
@@ -261,7 +265,7 @@ public class Species
 				else
 				{
 					if (isABetterParent)
-						unborn.dnas.Add(dnaPair.A);
+						unborn.addDNA(dnaPair.A);
 					else
 					{
 
@@ -324,18 +328,18 @@ public class Species
 			int whileLoopFailSafe = 100;
 			do
 			{
+				//input-hidden to hidden-output
 				first =  Random.Range(0, organism.InputNodeCount + organism.HiddenNodeCount);
 				if (first >= organism.InputNodeCount) first += organism.OutputNodeCount;
-				second = Random.Range(organism.InputNodeCount, organism.OutputNodeCount+ organism.HiddenNodeCount);				
+				second = Random.Range(organism.InputNodeCount, organism.InputNodeCount+ organism.OutputNodeCount+ organism.HiddenNodeCount);
+				if (whileLoopFailSafe-- <= 0) { Debug.Log("BREAK CALLED" + whileLoopFailSafe); break; }
 			} while (
-			//however choosing input - input is not valid
-			(first < organism.InputNodeCount && second < organism.InputNodeCount) &&
-			whileLoopFailSafe-- > 0 && !organism.getNode(first).isConnectedTo(second));;
-			if (whileLoopFailSafe == 0)
-			{
-				Debug.Log("Fail safe is triggered");
-				return;
-			}
+						//these are fail conditions if one of these is true continue the loop
+						organism.getNode(first).isConnectedTo(second) ||
+						(first < organism.InputNodeCount && second < organism.InputNodeCount) ||
+						(first == second)
+						);
+			Debug.Log("second " + second +   " FROM " + organism.InputNodeCount +  "to  " +(organism.OutputNodeCount + organism.HiddenNodeCount));
 			int mutationID = GlobalIDCounter.NewID;
 			//check if this is not new mutation
 			for (int i = 0; i < mutationHistory.Count; i++)
@@ -406,7 +410,9 @@ public class Species
 				dnaOutward.weight = dnaConnection.weight;
 				organism.addDNA(dnaInward);
 				organism.addDNA(dnaOutward);
-			if(mutationInformationFromHistory == null)
+				Debug.Log("dnaInward " + " FROM " + dnaInward.from + "to  " + dnaInward.to);
+				Debug.Log("dnaOutward " + " FROM " + dnaOutward.from + "to  " + dnaOutward.to);
+			if (mutationInformationFromHistory == null)
 			{
 				//update the history
 				mutationInformationFromHistory = new MutationInformation(idInward, MutationInformation.MUTATION_TYPE.CREATE_NODE, selectedDnaIndex, idOutgoing);
